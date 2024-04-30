@@ -2,77 +2,110 @@
 
 競プロ勉強用
 mypy推奨
+rootを探索した時に通ったnodeを全てroot直下に付け替えるといった申し訳程度の高速化がされています。
 
 ## コンストラクタ
 
-インスタンスの生成には、元となる配列`l:Iterable[T]`が必要である。
-以下の例は、最大値を管理したい場合。
+インスタンスの生成は以下の通り。要素全体の集合が既にある場合はそれを渡すことも可能。
+
+```python
+# 集合の要素を後から追加する場合
+uf = UnionFind()
+
+# 集合の要素が既にわかっている場合
+l = [1, 2, 3, 4, 5, 6]
+uf = UnionFind(l)
+```
+
+## 結合
 
 ```python
 l = [1, 2, 3, 4, 5, 6]
-st = SegmentTree(l, max)
+uf = UnionFind(l)
+uf.unite(3, 4)  # [{1}, {2}, {3, 4}, {5}, {6}]
+uf.unite(5, 6)  # [{1}, {2}, {3, 4}, {5, 6}]
 ```
 
-文字列の長さの最大値を管理したい場合は以下の通り。
+## 値の追加
+
+全体に新しい要素を追加する。
 
 ```python
-l = ["a", "aaa", "ab", "abcd", "d"]
-st = SegmentTree(l, lambda x, y: x if len(x) >= len(y) else y)
+l = [1, 2, 3, 4, 5, 6]
+uf = UnionFind(l)
+uf.add(7)  # [{1}, {2}, {3}, {4}, {5}, {6}, {7}]
 ```
 
-以下の通りにすれば、最大値とその個数を管理することも可能。
+## 同じ集合に属するかの判定
 
 ```python
-l:list[tuple[int, int]] = [(1, 1), (1, 5), (1, 3), (1, 4), (1, 5), (1, 4), (1, 5), (1, 7)]
+l = [1, 2, 3, 4, 5, 6]
+uf = UnionFind(l)
+uf.is_in_same(3, 4)  # False
+uf.unite(3, 4)
+uf.is_in_same(3, 4)  # True
+```
 
-def f(x:tuple[int, int], y:tuple[int, int]) -> tuple[int, int]:
-    if x[1] > y[1]:
-        return x
-    elif y[1] > x[1]:
-        return y
-    else:
-        return (x[0] + y[0], x[1])
+## 属する集合のサイズを取得
 
-st = SegmentTree(l, f)
+```python
+l = [1, 2, 3, 4, 5, 6]
+uf = UnionFind(l)
+uf.get_size(3)  # 1
+uf.unite(3, 4)
+uf.get_size(3)  # 2
+```
+
+## ある要素のrootの取得
+
+```python
+l = [1, 2, 3, 4, 5, 6]
+uf = UnionFind(l)
+uf.find_root(3)  # 3
+uf.unite(3, 4)
+uf.find_root(3)  # 3 or 4
+```
+
+## root一覧の取得
+
+```python
+l = [1, 2, 3, 4, 5, 6]
+uf = UnionFind(l)
+print(uf.roots)  # {1, 2, 3, 4, 5, 6}
+uf.unite(3, 4)
+print(uf.roots)  # {1, 2, 3, 5, 6} or {1, 2, 4, 5, 6}
+```
+
+## ループ
+
+`for s in uf`の様にループを回した場合、`s`には集合が一つずつ渡される。
+
+```python
+l = [1, 2, 3, 4, 5, 6]
+uf = UnionFind(l)
+uf.unite(3, 4)
+uf.add(7)
+uf.unite(1, 5)
+
+for s in uf:
+    print(s)
+
+# {2}
+# {3, 4}
+# {1, 5}
+# {6}
+# {7}
+
 ```
 
 ## 表示
 
-`print`で元の配列に対応する配列を表示
-
 ```python
 l = [1, 2, 3, 4, 5, 6]
-st = SegmentTree(l, max)
-print(st) # [1, 2, 3, 4, 5, 6]
-```
+uf = UnionFind(l)
+uf.unite(3, 4)
+uf.add(7)
+uf.unite(1, 5)
 
-## 値の更新
-
-元の配列の`i`番目の要素を`x`に書き換える場合、以下の通り
-
-```python
-l = [1, 2, 3, 4, 5, 6]
-st = SegmentTree(l, max)
-st[0] = 7
-print(st) # [7, 2, 3, 4, 5, 6]
-```
-
-## 値の取得
-
-元の配列の`i`番目の要素を取得する場合は以下の通り
-
-```python
-l = [1, 2, 3, 4, 5, 6]
-st = SegmentTree(l, max)
-print(st[3]) # 4
-```
-
-元の配列の`[l, r)`での関数`f`による値の取得は以下の通り。
-
-```python
-l = [1, 2, 3, 4, 5, 6]
-st = SegmentTree(l, max)
-print(st[:]) # 6
-print(st[0:0]) # 1
-print(st[2:6]) # 6
+print(uf)  # [{2}, {3, 4}, {1, 5}, {6}, {7}]
 ```

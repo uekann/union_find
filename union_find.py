@@ -4,7 +4,7 @@ _T = TypeVar("_T")
 
 
 class UnionFind(Generic[_T]):
-    def __init__(self, l: Iterable[_T]) -> None:
+    def __init__(self, l: Iterable[_T] = []) -> None:
         l_ = set(l)
         self._all_members = l_
         self._parent: dict[_T, Optional[_T]] = {t: None for t in l_}
@@ -57,7 +57,7 @@ class UnionFind(Generic[_T]):
         return self._chils_num[self.find_root(p)]
 
     def __iter__(self):
-        d = {r: set() for r in self._roots}
+        d = {r: set() for r in self.roots}
         for p in self._all_members:
             d[self.find_root(p)].add(p)
 
